@@ -353,6 +353,18 @@ func (r mainRoutes) EditCoursePage(c *gin.Context) {
 	}
 
 	hasTestCourse := tumLiveContext.User.HasTestCourse()
+	courseIntegrations := courseIntegrationData{}
+	authorizationCourse, err := r.IntegrationGrantDao.GetCourseForAuthorization(c, tumLiveContext.Course.ID)
+	if err != nil {
+		logger.Error("could not check course integration access", "err", err)
+	} else if canAuthorizeCourse(tumLiveContext.User, authorizationCourse) {
+		courseIntegrations.CanManage = true
+		courseIntegrations.Grants, err = r.IntegrationGrantDao.GetCourseIntegrationGrants(c, tumLiveContext.Course.ID)
+		if err != nil {
+			logger.Error("could not load course integrations", "err", err)
+			courseIntegrations.Error = "Authorized applications are unavailable. Reload this page to try again."
+		}
+	}
 
 	err = templateExecutor.ExecuteTemplate(c.Writer, "admin.gohtml", AdminPageData{
 		IndexData: indexData,
@@ -362,10 +374,11 @@ func (r mainRoutes) EditCoursePage(c *gin.Context) {
 		CurY:      tumLiveContext.Course.Year,
 		CurT:      tumLiveContext.Course.TeachingTerm,
 		EditCourseData: EditCourseData{
-			IndexData:    indexData,
-			Courses:      courses,
-			IngestBase:   tools.Cfg.IngestBase,
-			LectureHalls: lectureHalls,
+			IndexData:          indexData,
+			Courses:            courses,
+			IngestBase:         tools.Cfg.IngestBase,
+			LectureHalls:       lectureHalls,
+			CourseIntegrations: courseIntegrations,
 		},
 		HasTestCourse: hasTestCourse,
 	})
@@ -457,10 +470,11 @@ func (apd AdminPageData) UsersAsJson() string {
 }
 
 type EditCourseData struct {
-	IndexData    IndexData
-	IngestBase   string
-	LectureHalls []model.LectureHall
-	Courses      []model.Course // administered courses of user
+	IndexData          IndexData
+	IngestBase         string
+	LectureHalls       []model.LectureHall
+	Courses            []model.Course // administered courses of user
+	CourseIntegrations courseIntegrationData
 }
 
 type LectureUnitsPageData struct {
