@@ -31,6 +31,7 @@ var services = []service{
 			"getSemesters":           public,
 			"getServerNotifications": public,
 			"getNotifications":       authenticated,
+			"getIntegration":         integrationOnly,
 		},
 	},
 	{

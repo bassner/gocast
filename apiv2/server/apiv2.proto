@@ -97,6 +97,15 @@ service MetaService {
       description: "Retrieves current server notifications."
     };
   }
+
+  rpc getIntegration(google.protobuf.Empty) returns (GetIntegrationResponse) {
+    option (google.api.http) = {get: "/integration"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Integrations"
+      summary: "Check integration credentials."
+      description: "Returns the integration authenticated by the bearer API key."
+    };
+  }
 }
 
 // The signed-in user's own account, and the endpoints the login page needs
@@ -861,4 +870,10 @@ message CameraPreset {
   uint32 id = 1;
   string name = 2;
   string description = 3;
+}
+
+message GetIntegrationResponse {
+  uint32 id = 1;
+  string name = 2;
+  string return_url = 3;
 }

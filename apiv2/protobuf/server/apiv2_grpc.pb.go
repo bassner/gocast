@@ -26,6 +26,7 @@ const (
 	MetaService_GetSemesters_FullMethodName           = "/protobuf.MetaService/getSemesters"
 	MetaService_GetNotifications_FullMethodName       = "/protobuf.MetaService/getNotifications"
 	MetaService_GetServerNotifications_FullMethodName = "/protobuf.MetaService/getServerNotifications"
+	MetaService_GetIntegration_FullMethodName         = "/protobuf.MetaService/getIntegration"
 )
 
 // MetaServiceClient is the client API for MetaService service.
@@ -39,6 +40,7 @@ type MetaServiceClient interface {
 	GetSemesters(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetSemestersResponse, error)
 	GetNotifications(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetNotificationsResponse, error)
 	GetServerNotifications(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetServerNotificationsResponse, error)
+	GetIntegration(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetIntegrationResponse, error)
 }
 
 type metaServiceClient struct {
@@ -99,6 +101,16 @@ func (c *metaServiceClient) GetServerNotifications(ctx context.Context, in *empt
 	return out, nil
 }
 
+func (c *metaServiceClient) GetIntegration(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetIntegrationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetIntegrationResponse)
+	err := c.cc.Invoke(ctx, MetaService_GetIntegration_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MetaServiceServer is the server API for MetaService service.
 // All implementations must embed UnimplementedMetaServiceServer
 // for forward compatibility.
@@ -110,6 +122,7 @@ type MetaServiceServer interface {
 	GetSemesters(context.Context, *emptypb.Empty) (*GetSemestersResponse, error)
 	GetNotifications(context.Context, *emptypb.Empty) (*GetNotificationsResponse, error)
 	GetServerNotifications(context.Context, *emptypb.Empty) (*GetServerNotificationsResponse, error)
+	GetIntegration(context.Context, *emptypb.Empty) (*GetIntegrationResponse, error)
 	mustEmbedUnimplementedMetaServiceServer()
 }
 
@@ -134,6 +147,9 @@ func (UnimplementedMetaServiceServer) GetNotifications(context.Context, *emptypb
 }
 func (UnimplementedMetaServiceServer) GetServerNotifications(context.Context, *emptypb.Empty) (*GetServerNotificationsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetServerNotifications not implemented")
+}
+func (UnimplementedMetaServiceServer) GetIntegration(context.Context, *emptypb.Empty) (*GetIntegrationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetIntegration not implemented")
 }
 func (UnimplementedMetaServiceServer) mustEmbedUnimplementedMetaServiceServer() {}
 func (UnimplementedMetaServiceServer) testEmbeddedByValue()                     {}
@@ -246,6 +262,24 @@ func _MetaService_GetServerNotifications_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MetaService_GetIntegration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetaServiceServer).GetIntegration(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MetaService_GetIntegration_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetaServiceServer).GetIntegration(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MetaService_ServiceDesc is the grpc.ServiceDesc for MetaService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -272,6 +306,10 @@ var MetaService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "getServerNotifications",
 			Handler:    _MetaService_GetServerNotifications_Handler,
+		},
+		{
+			MethodName: "getIntegration",
+			Handler:    _MetaService_GetIntegration_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
