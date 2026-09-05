@@ -1011,6 +1011,30 @@
         ]
       }
     },
+    "/integration": {
+      "get": {
+        "summary": "Check integration credentials.",
+        "description": "Returns the integration authenticated by the bearer API key.",
+        "operationId": "MetaService_getIntegration",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protobufGetIntegrationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Integrations"
+        ]
+      }
+    },
     "/login-options": {
       "get": {
         "summary": "Get available login methods.",
@@ -1953,6 +1977,21 @@
         "content": {
           "type": "string",
           "description": "Rendered from Markdown and sanitised server-side; the client must not do it again."
+        }
+      }
+    },
+    "protobufGetIntegrationResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "returnUrl": {
+          "type": "string"
         }
       }
     },
