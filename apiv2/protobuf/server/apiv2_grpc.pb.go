@@ -30,6 +30,7 @@ const (
 	MetaService_ListInfoPages_FullMethodName                  = "/protobuf.MetaService/listInfoPages"
 	MetaService_GetIntegration_FullMethodName                 = "/protobuf.MetaService/getIntegration"
 	MetaService_RedeemIntegrationAuthorization_FullMethodName = "/protobuf.MetaService/redeemIntegrationAuthorization"
+	MetaService_GetIntegrationGrant_FullMethodName            = "/protobuf.MetaService/getIntegrationGrant"
 )
 
 // MetaServiceClient is the client API for MetaService service.
@@ -47,6 +48,7 @@ type MetaServiceClient interface {
 	ListInfoPages(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListInfoPagesResponse, error)
 	GetIntegration(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetIntegrationResponse, error)
 	RedeemIntegrationAuthorization(ctx context.Context, in *RedeemIntegrationAuthorizationRequest, opts ...grpc.CallOption) (*RedeemIntegrationAuthorizationResponse, error)
+	GetIntegrationGrant(ctx context.Context, in *GetIntegrationGrantRequest, opts ...grpc.CallOption) (*GetIntegrationGrantResponse, error)
 }
 
 type metaServiceClient struct {
@@ -147,6 +149,16 @@ func (c *metaServiceClient) RedeemIntegrationAuthorization(ctx context.Context, 
 	return out, nil
 }
 
+func (c *metaServiceClient) GetIntegrationGrant(ctx context.Context, in *GetIntegrationGrantRequest, opts ...grpc.CallOption) (*GetIntegrationGrantResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetIntegrationGrantResponse)
+	err := c.cc.Invoke(ctx, MetaService_GetIntegrationGrant_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MetaServiceServer is the server API for MetaService service.
 // All implementations must embed UnimplementedMetaServiceServer
 // for forward compatibility.
@@ -162,6 +174,7 @@ type MetaServiceServer interface {
 	ListInfoPages(context.Context, *emptypb.Empty) (*ListInfoPagesResponse, error)
 	GetIntegration(context.Context, *emptypb.Empty) (*GetIntegrationResponse, error)
 	RedeemIntegrationAuthorization(context.Context, *RedeemIntegrationAuthorizationRequest) (*RedeemIntegrationAuthorizationResponse, error)
+	GetIntegrationGrant(context.Context, *GetIntegrationGrantRequest) (*GetIntegrationGrantResponse, error)
 	mustEmbedUnimplementedMetaServiceServer()
 }
 
@@ -198,6 +211,9 @@ func (UnimplementedMetaServiceServer) GetIntegration(context.Context, *emptypb.E
 }
 func (UnimplementedMetaServiceServer) RedeemIntegrationAuthorization(context.Context, *RedeemIntegrationAuthorizationRequest) (*RedeemIntegrationAuthorizationResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RedeemIntegrationAuthorization not implemented")
+}
+func (UnimplementedMetaServiceServer) GetIntegrationGrant(context.Context, *GetIntegrationGrantRequest) (*GetIntegrationGrantResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetIntegrationGrant not implemented")
 }
 func (UnimplementedMetaServiceServer) mustEmbedUnimplementedMetaServiceServer() {}
 func (UnimplementedMetaServiceServer) testEmbeddedByValue()                     {}
@@ -382,6 +398,24 @@ func _MetaService_RedeemIntegrationAuthorization_Handler(srv interface{}, ctx co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MetaService_GetIntegrationGrant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetIntegrationGrantRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetaServiceServer).GetIntegrationGrant(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MetaService_GetIntegrationGrant_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetaServiceServer).GetIntegrationGrant(ctx, req.(*GetIntegrationGrantRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MetaService_ServiceDesc is the grpc.ServiceDesc for MetaService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -424,6 +458,10 @@ var MetaService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "redeemIntegrationAuthorization",
 			Handler:    _MetaService_RedeemIntegrationAuthorization_Handler,
+		},
+		{
+			MethodName: "getIntegrationGrant",
+			Handler:    _MetaService_GetIntegrationGrant_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
