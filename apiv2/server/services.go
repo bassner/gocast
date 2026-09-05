@@ -33,6 +33,7 @@ var services = []service{
 			"getNotifications":               authenticated,
 			"getIntegration":                 integrationOnly,
 			"redeemIntegrationAuthorization": integrationOnly,
+			"getIntegrationGrant":            integrationOnly,
 		},
 	},
 	{
