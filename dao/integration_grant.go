@@ -2,6 +2,7 @@ package dao
 
 import (
 	"context"
+	"crypto/subtle"
 	"errors"
 	"time"
 
@@ -18,12 +19,39 @@ type IntegrationGrantDao interface {
 	GetAuthorizableCourses(context.Context, uint) ([]model.Course, error)
 	GetCourseForAuthorization(context.Context, uint) (model.Course, error)
 	ApproveIntegrationCourse(context.Context, uint, uint, []byte, []byte, time.Time) (uint, error)
+	RedeemIntegrationAuthorizationCode(context.Context, uint, []byte, []byte, time.Time) (uint, uint, error)
 	GetCourseIntegrationGrants(context.Context, uint) ([]model.IntegrationGrant, error)
 	RevokeIntegrationGrant(context.Context, uint, uint) error
 }
 
 type integrationGrantDao struct {
 	db *gorm.DB
+}
+
+func (d integrationGrantDao) RedeemIntegrationAuthorizationCode(ctx context.Context, integrationID uint, codeHash, stateHash []byte, now time.Time) (grantID, courseID uint, err error) {
+	err = d.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var code model.IntegrationAuthorizationCode
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("code_hash = ?", codeHash).First(&code).Error; err != nil {
+			return err
+		}
+		if code.IntegrationID != integrationID || subtle.ConstantTimeCompare(code.StateHash, stateHash) != 1 || !code.ExpiresAt.After(now) {
+			return gorm.ErrRecordNotFound
+		}
+		var grant model.IntegrationGrant
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("id = ? AND integration_id = ? AND revoked_at IS NULL", code.GrantID, integrationID).First(&grant).Error; err != nil {
+			return err
+		}
+		result := tx.Where("code_hash = ?", codeHash).Delete(&model.IntegrationAuthorizationCode{})
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected != 1 {
+			return gorm.ErrRecordNotFound
+		}
+		grantID, courseID = grant.ID, grant.CourseID
+		return nil
+	})
+	return grantID, courseID, err
 }
 
 func NewIntegrationGrantDao() IntegrationGrantDao { return &integrationGrantDao{db: DB} }
