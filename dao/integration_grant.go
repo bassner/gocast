@@ -23,6 +23,7 @@ type IntegrationGrantDao interface {
 	GetIntegrationGrantCourse(context.Context, uint, uint) (model.Course, error)
 	GetCourseIntegrationGrants(context.Context, uint) ([]model.IntegrationGrant, error)
 	RevokeIntegrationGrant(context.Context, uint, uint) error
+	RevokeIntegrationGrantForIntegration(context.Context, uint, uint) error
 }
 
 type integrationGrantDao struct {
@@ -135,4 +136,10 @@ func (d integrationGrantDao) RevokeIntegrationGrant(ctx context.Context, grantID
 		return gorm.ErrRecordNotFound
 	}
 	return nil
+}
+
+func (d integrationGrantDao) RevokeIntegrationGrantForIntegration(ctx context.Context, grantID, integrationID uint) error {
+	return d.db.WithContext(ctx).Model(&model.IntegrationGrant{}).
+		Where("id = ? AND integration_id = ? AND revoked_at IS NULL", grantID, integrationID).
+		Update("revoked_at", time.Now()).Error
 }
