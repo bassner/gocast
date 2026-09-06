@@ -72,3 +72,18 @@ func (a *API) GetIntegrationGrant(ctx context.Context, req *protobuf.GetIntegrat
 		CourseId: uint32(course.ID), Name: course.Name, Slug: course.Slug, Visibility: course.Visibility,
 	}, nil
 }
+
+func (a *API) RevokeIntegrationGrant(ctx context.Context, req *protobuf.RevokeIntegrationGrantRequest) (*emptypb.Empty, error) {
+	if req.GetGrantId() == 0 {
+		return nil, e.WithStatus(http.StatusBadRequest, errors.New("grant_id must be positive"))
+	}
+	integration, err := a.getCurrentIntegration(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := a.dao.IntegrationGrantDao.RevokeIntegrationGrantForIntegration(ctx, uint(req.GetGrantId()), integration.ID); err != nil {
+		a.log.Error("integration grant revocation failed", "err", err)
+		return nil, e.WithStatus(http.StatusInternalServerError, errors.New("could not revoke integration grant"))
+	}
+	return &emptypb.Empty{}, nil
+}
