@@ -127,6 +127,15 @@ service MetaService {
       description: "Returns fixed metadata for the course authorized by this integration grant."
     };
   }
+
+  rpc revokeIntegrationGrant(RevokeIntegrationGrantRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {delete: "/integration/grants/{grant_id}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Integrations"
+      summary: "Revoke an integration grant."
+      description: "Revokes this integration's access through the specified grant."
+    };
+  }
 }
 
 // The signed-in user's own account, and the endpoints the login page needs
@@ -910,6 +919,10 @@ message RedeemIntegrationAuthorizationResponse {
 }
 
 message GetIntegrationGrantRequest {
+  uint32 grant_id = 1;
+}
+
+message RevokeIntegrationGrantRequest {
   uint32 grant_id = 1;
 }
 
