@@ -73,6 +73,9 @@ func TestIntegrationCourseGrants(t *testing.T) {
 	course, err := d.GetIntegrationGrantCourse(ctx, grantID, 1)
 	require.NoError(t, err)
 	require.Equal(t, uint(2), course.ID)
+	require.NoError(t, d.RevokeIntegrationGrantForIntegration(ctx, grantID, 2))
+	_, err = d.GetIntegrationGrantCourse(ctx, grantID, 1)
+	require.NoError(t, err)
 	_, err = d.GetIntegrationGrantCourse(ctx, grantID, 2)
 	require.ErrorIs(t, err, gorm.ErrRecordNotFound)
 	if err := d.RevokeIntegrationGrant(ctx, grantID, 1); !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -96,6 +99,11 @@ func TestIntegrationCourseGrants(t *testing.T) {
 	require.NoError(t, db.Delete(&model.Course{}, 2).Error)
 	_, err = d.GetIntegrationGrantCourse(ctx, newID, 1)
 	require.ErrorIs(t, err, gorm.ErrRecordNotFound)
+	require.NoError(t, d.RevokeIntegrationGrantForIntegration(ctx, newID, 1))
+	require.NoError(t, d.RevokeIntegrationGrantForIntegration(ctx, newID, 1))
+	grants, err = d.GetCourseIntegrationGrants(ctx, 2)
+	require.NoError(t, err)
+	require.Empty(t, grants)
 }
 
 func TestRedeemIntegrationAuthorizationCodeIsAtomicAndRequiresLiveGrant(t *testing.T) {
